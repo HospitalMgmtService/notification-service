@@ -42,7 +42,7 @@ public class EmailServiceImpl implements EmailService {
 
         EmailRequest emailRequest = EmailRequest.builder()
                 .sender(Sender.builder()
-                        .name("PNK Solutions")
+                        .name("PNK")
                         .email("vhphong@gmail.com")
                         .build())
                 .to(List.of(sendEmailRequest.getTo()))
@@ -73,6 +73,8 @@ public class EmailServiceImpl implements EmailService {
         emailRecord.setEmailRequest(emailRequest);
         emailRecord.setEmailResponse(emailResponse);
         emailRecord.setSentDateTime(LocalDateTime.now());
+
+        log.info(">> recordEmailInDatabase::emailRecord {}", emailRecord);
 
         emailRecordRepository.save(emailRecord);
     }
