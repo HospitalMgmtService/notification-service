@@ -3,8 +3,10 @@ server:
   servlet:
     context-path: /notification
 spring:
+  config:
+    import: "secrets.yml"
   application:
     name: notification-service
   data:
     mongodb:
-      uri: mongodb://root:root@localhost:27017/notification-service
+      uri: mongodb://localhost:27017/notification-service
