@@ -4,16 +4,21 @@ import com.pnk.notification_service.dto.request.EmailRequest;
 import com.pnk.notification_service.dto.request.SendEmailRequest;
 import com.pnk.notification_service.dto.request.Sender;
 import com.pnk.notification_service.dto.response.EmailResponse;
+import com.pnk.notification_service.entity.EmailRecord;
 import com.pnk.notification_service.exception.AppException;
 import com.pnk.notification_service.exception.ErrorCode;
+import com.pnk.notification_service.repository.EmailRecordRepository;
 import com.pnk.notification_service.repository.httpclient.EmailClient;
 import feign.FeignException;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 
@@ -25,8 +30,11 @@ public class EmailServiceImpl implements EmailService {
 
     EmailClient emailClient;
 
-    String apiKey = "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";
+    EmailRecordRepository emailRecordRepository;
 
+    @NonFinal
+    @Value("${email.api-key}")
+    protected String apiKey;
 
     @Override
     public EmailResponse deliverEmail(SendEmailRequest sendEmailRequest) {
@@ -34,7 +42,7 @@ public class EmailServiceImpl implements EmailService {
 
         EmailRequest emailRequest = EmailRequest.builder()
                 .sender(Sender.builder()
-                        .name("PNK Solutions")
+                        .name("PNK")
                         .email("vhphong@gmail.com")
                         .build())
                 .to(List.of(sendEmailRequest.getTo()))
@@ -44,11 +52,31 @@ public class EmailServiceImpl implements EmailService {
 
         log.info(">> deliverEmail::emailRequest: {}", emailRequest);
 
+        EmailResponse emailResponse;
         try {
-            return emailClient.sendEmail(apiKey, emailRequest);
+            emailResponse = emailClient.sendEmail(apiKey, emailRequest);
+            recordEmailInDatabase(emailRequest, emailResponse);
         } catch (FeignException e) {
             throw new AppException(ErrorCode.CANNOT_SEND_EMAIL);
         }
 
+        return emailResponse;
     }
+
+
+    /*
+     * create a record of delivered email in database for following up
+     * */
+    @Override
+    public void recordEmailInDatabase(EmailRequest emailRequest, EmailResponse emailResponse) {
+        EmailRecord emailRecord = new EmailRecord();
+        emailRecord.setEmailRequest(emailRequest);
+        emailRecord.setEmailResponse(emailResponse);
+        emailRecord.setSentDateTime(LocalDateTime.now());
+
+        log.info(">> recordEmailInDatabase::emailRecord {}", emailRecord);
+
+        emailRecordRepository.save(emailRecord);
+    }
+
 }
