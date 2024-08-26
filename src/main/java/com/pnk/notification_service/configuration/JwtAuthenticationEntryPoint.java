@@ -1,7 +1,6 @@
 package com.pnk.notification_service.configuration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import com.pnk.notification_service.dto.request.ApiResponse;
 import com.pnk.notification_service.exception.ErrorCode;
 import jakarta.servlet.ServletException;

@@ -33,12 +33,14 @@ public class EmailServiceImpl implements EmailService {
     EmailRecordRepository emailRecordRepository;
 
     @NonFinal
-    @Value("${email.api-key}")
+    @Value("${spring.notification.email.brevo-apikey}")
     protected String apiKey;
+
 
     @Override
     public EmailResponse deliverEmail(SendEmailRequest sendEmailRequest) {
         log.info(">> deliverEmail::sendEmailRequest: {}", sendEmailRequest);
+        log.info(">> deliverEmail::apiKey: {}", apiKey);
 
         EmailRequest emailRequest = EmailRequest.builder()
                 .sender(Sender.builder()
